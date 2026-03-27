@@ -283,7 +283,9 @@ class View {
         })
     }
     render(layout) {
-        if (!layout) return
+        // Guard: iframe document may not be ready during section transitions
+        // (ResizeObserver can fire before iframe content loads)
+        if (!layout || !this.document?.documentElement) return
         this.#column = layout.flow !== 'scrolled'
         this.#layout = layout
         if (this.#column) this.columnize(layout)
@@ -360,6 +362,8 @@ class View {
         }
     }
     expand() {
+        // Guard: iframe document may not be ready during section transitions
+        if (!this.document?.documentElement) return
         const { documentElement } = this.document
         if (this.#column) {
             const side = this.#vertical ? 'height' : 'width'
@@ -752,7 +756,7 @@ export class Paginator extends HTMLElement {
         return { height, width, margin, gap, columnWidth }
     }
     render() {
-        if (!this.#view) return
+        if (!this.#view?.document) return
         this.#view.render(this.#beforeRender({
             vertical: this.#vertical,
             rtl: this.#rtl,
